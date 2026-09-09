@@ -1,6 +1,8 @@
 import os
+from pathlib import Path
 
 os.environ["CRESTMIND_DB_PATH"] = "/tmp/crestmind-test.db"
+Path(os.environ["CRESTMIND_DB_PATH"]).unlink(missing_ok=True)
 
 from fastapi.testclient import TestClient
 
