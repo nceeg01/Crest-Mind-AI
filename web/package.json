@@ -1,0 +1,1 @@
+{"name":"crestmind-web","private":true,"version":"2.0.0","type":"module","scripts":{"dev":"vite","build":"vite build","test":"vitest run"},"dependencies":{"react":"latest","react-dom":"latest"},"devDependencies":{"@vitejs/plugin-react":"latest","vite":"latest","vitest":"latest"}}

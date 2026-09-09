@@ -1,120 +1,26 @@
-# 🏢 CrestMind AI — Property Intelligence Platform
-> UNT Capstone | Group 13 | Built for Woodcrest Capital | Spring 2026
+# CrestMind AI
 
-CrestMind AI is a RAG (Retrieval-Augmented Generation) system that lets 
-Woodcrest Capital employees ask plain English questions about thousands of 
-property documents and get cited, accurate answers instantly.
+Synthetic, resume-aligned portfolio demonstration of property-document intelligence. It includes a responsive React evidence workspace and a FastAPI ingestion/retrieval service with durable SQLite persistence for local/container use.
 
----
+No client documents or production metrics are included. The public browser demo uses deterministic synthetic retrieval. Llama 3.3, Vertex AI OCR, Supabase, and pgvector describe prior project context or future adapters; this MVP does not claim those providers are live.
 
-## 💡 The Problem It Solves
-
-Property managers currently dig through hundreds of leases, HVAC reports, 
-and invoices manually. CrestMind lets them just ask:
-
-- *"What are the HVAC responsibilities for Ollie's property?"*
-- *"When does the exclusive use clause expire on this lease?"*
-- *"What was the total ductwork repair cost?"*
-
-And get an instant answer with the exact source document cited.
-
----
-
-## 🏗️ How It Works
-```
-PDF/DOCX Documents
-      ↓
-OCR + Text Extraction
-      ↓
-Split into 500-char chunks
-      ↓
-Convert to vectors (embeddings)
-      ↓
-Store in Supabase (PostgreSQL + pgvector)
-      ↓
-[User asks a question]
-      ↓
-Find similar chunks (similarity search)
-      ↓
-Send to Llama 3.3 70B (Groq → GCP Vertex AI)
-      ↓
-Answer + Source Citation
+## Run
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn api.main:app --reload
+cd web && npm install && npm run dev
 ```
 
----
-
-## 👥 Team — Group 13
-
-| Name | Role |
-|---|---|
-| Satish Wagle | AI Lead — RAG Pipeline, Embeddings, LLM |
-| Sushil Dahal | Team Lead — Backend & Database |
-| Smarika Koirala | Frontend Lead — React UI |
-| Saurav Pandey | OCR & Document Ingestion |
-| Yubraj Chaulagain | DevOps — GCP & Deployment |
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| LLM | Llama 3.3 70B (Groq for dev, GCP Vertex AI for prod) |
-| Embeddings | OpenAI text-embedding-3-small |
-| Vector Database | Supabase + pgvector |
-| Prototype UI | Streamlit |
-| Production UI | React |
-| Deployment | Docker → GCP / On-Premise |
-
----
-
-## 📁 Project Structure
-```
-crestmind-ai/
-├── app.py                  ← Streamlit prototype
-├── ingest/
-│   ├── loader.py           ← PDF/DOCX → raw text
-│   ├── chunker.py          ← text → chunks
-│   └── embedder.py         ← chunks → vectors → Supabase
-├── rag/
-│   ├── retriever.py        ← similarity search
-│   └── generator.py        ← LLM call + citations
-├── db/
-│   ├── schema.sql          ← Supabase table setup
-│   └── client.py           ← Supabase connection
-├── ui/
-│   └── components.py       ← UI components
-├── data/
-│   └── samples/            ← test documents (gitignored)
-├── .env.example            ← environment variables template
-└── requirements.txt
+## Verify
+```bash
+pytest -q
+cd web && npm test && npm run build
 ```
 
----
+Tests cover cited answers, property isolation, bounded retrieval, and idempotent ingestion. Uploads are limited to 5 MB. Text PDFs use PyMuPDF; scanned PDFs invoke Tesseract OCR and fail clearly when it is unavailable. DOCX citations use paragraph locators rather than invented pages.
 
-## 🔐 Environment Variables
-```
-OPENAI_API_KEY=        ← for embeddings
-GROQ_API_KEY=          ← for LLM calls (dev)
-SUPABASE_URL=          ← your Supabase project URL
-SUPABASE_KEY=          ← your Supabase anon key
-GCP_PROJECT_ID=        ← for Vertex AI (prod)
-```
+## Team context
+CrestMind began as UNT Capstone Group 13 work for Woodcrest Capital in Spring 2026. Original repository roles: Satish Wagle (AI), Sushil Dahal (backend/database), Smarika Koirala (frontend), Saurav Pandey (OCR/ingestion), and Yubraj Chaulagain (GCP/deployment).
 
----
-
-## 🌿 Branch Structure
-
-| Branch | Purpose |
-|---|---|
-| `main` | Final stable code only |
-| `develop` | Team integration branch |
-| `sample` | Streamlit prototype + RAG testing |
-
----
-
-## ⚠️ Important
-
-- Never commit `.env` — it contains secret keys
-- Never commit `data/samples/` — client documents are confidential
-- Always work on `sample` or `develop`, never directly on `main` 
+The public browser demo does not persist server uploads. Local/container mode persists to SQLite. Retrieval scores are term-overlap metadata, not calibrated answer probabilities.
